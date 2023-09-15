@@ -1,1 +1,68 @@
+# Required Libraries
+install.packages(c("caret", "httr", "dplyr"))
+library(caret)
+library(httr)
+library(dplyr)
 
+# Constants
+THRESHOLD <- 2 # Example threshold
+
+# Function to check resources of an edge device
+CheckResources <- function(edge_device) {
+  # Placeholder function. Actual implementation will depend on how you can access resource info from edge devices.
+  # For this example, we'll return random values.
+  sample(1:4, 1)
+}
+
+# Function to perform Recursive Feature Elimination (RFE)
+RFE <- function(data, model) {
+  # Placeholder function. Actual implementation will depend on the specifics of your data and model.
+  # For this example, we'll return a random subset of the data's columns.
+  sample(colnames(data), size = floor(ncol(data) / 2))
+}
+
+# Function to aggregate features from all devices
+AggregateFeaturesFromAllDevices <- function() {
+  # Placeholder function. Actual implementation will depend on how you collect and aggregate features from devices.
+  # For this example, we'll return a random set of features.
+  c("feature1", "feature2", "feature3")
+}
+
+# Main FederatedFeatureSelection function
+FederatedFeatureSelection <- function(Model) {
+  # Placeholder for edge devices. Actual edge devices will be a list of URLs or IP addresses or some identifiers.
+  edge_devices <- c("device1", "device2", ...)
+
+  Global_selected_features <- c()
+
+  for (edge_device in edge_devices) {
+    tryCatch({
+      resources <- CheckResources(edge_device)
+      
+      if (resources > THRESHOLD) {
+        selected_features <- RFE(edge_device$data, Model)
+        
+        # Send selected_features to central server
+        # Placeholder. Actual sending will depend on how you interface with the central server.
+        
+        Global_selected_features <- union(Global_selected_features, selected_features)
+      }
+      
+    }, error = function(e) {
+      # Log error and skip edge_device
+      cat("Error encountered for", edge_device, ":", e$message, "\n")
+    })
+  }
+  
+  Global_selected_features <- AggregateFeaturesFromAllDevices()
+  
+  # Use version control to ensure consistency in the feature selection method
+  # Placeholder. Actual version control will depend on your desired version control strategy.
+  
+  return(Global_selected_features)
+}
+
+# Run the FederatedFeatureSelection function
+Model <- "FeMuDeep" # Placeholder for the actual model
+selected_features <- FederatedFeatureSelection(Model)
+print(selected_features)
