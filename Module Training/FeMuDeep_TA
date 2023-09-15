@@ -1,1 +1,77 @@
 
+# Required Libraries
+install.packages(c("caret", "dplyr"))
+library(caret)
+library(dplyr)
+
+# Constants
+THRESHOLD <- 2 # Example threshold
+
+# Placeholder for the global model
+M_g <- NULL
+
+# Function to check resources of an edge device
+CheckResources <- function(edge_device) {
+  # Placeholder function. Actual implementation will depend on how you can access resource info from edge devices.
+  # For this example, we'll return random values.
+  sample(1:4, 1)
+}
+
+# Function to train the model
+train <- function(model, data) {
+  # Placeholder function. Actual implementation will depend on the specifics of your data and model.
+  # For this example, we'll return a random model.
+  list(weights = runif(ncol(data)))
+}
+
+# Function to aggregate models from all devices
+WeightedAggregate <- function(models) {
+  # Placeholder function. Actual implementation will depend on how you collect and aggregate models from devices.
+  # For this example, we'll return a random model.
+  list(weights = runif(length(models)))
+}
+
+# Main EnhancedFederatedTrainingAndAggregation function
+EnhancedFederatedTrainingAndAggregation <- function() {
+  # Placeholder for edge devices. Actual edge devices will be a list of URLs or IP addresses or some identifiers.
+  edge_devices <- c("device1", "device2", ...)
+
+  models <- list()
+
+  for (edge_device in edge_devices) {
+    tryCatch({
+      # Fetch latest version of M_g
+      # Placeholder. Actual fetching will depend on how you interface with the central server.
+      
+      resources <- CheckResources(edge_device)
+      
+      if (resources > THRESHOLD) {
+        # StratifiedSample or WeightData based on D_d
+        # Placeholder. Actual sampling or weighting will depend on your desired strategy.
+        
+        selected_features <- c("feature1", "feature2", ...) # Placeholder for selected features
+        M_d_prime <- train(M_g, edge_device$data[selected_features])
+        
+        # Check communication_frequency condition
+        # Placeholder. Actual condition will depend on your desired communication strategy.
+        if (TRUE) {
+          # Securely send M_d_prime to central server
+          # Placeholder. Actual sending will depend on how you interface with the central server.
+          models <- append(models, list(M_d_prime))
+        }
+      }
+      
+    }, error = function(e) {
+      # Handle error (e.g., log, retry, or skip edge_device)
+      cat("Error encountered for", edge_device, ":", e$message, "\n")
+    })
+  }
+  
+  M_g_prime <- WeightedAggregate(models)
+  
+  return(M_g_prime)
+}
+
+# Run the EnhancedFederatedTrainingAndAggregation function
+new_model <- EnhancedFederatedTrainingAndAggregation()
+print(new_model)
