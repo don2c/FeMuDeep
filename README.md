@@ -1,4 +1,4 @@
-# Enhanced FeMuDeep for OSN Datasets
+# Enabling Privacy-Preserving Decentralized Training and Intrusion Detection in Networked Systems through Federated Learning
 
 ## Abstract
 
