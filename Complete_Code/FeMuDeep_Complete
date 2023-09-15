@@ -1,1 +1,405 @@
 
+# Required Libraries
+install.packages(c("httr", "openssl", "digest"))
+library(httr)
+library(openssl)
+library(digest)
+
+# Initialize
+OSN_dataset <- list()
+ErrorLog <- list()
+
+# Function to collect data from an edge device
+collect_data_from_device <- function(edge_device) {
+  tryCatch({
+    # Securely connect to edge_device using TLS
+    # Assuming edge_device is a URL endpoint
+    response <- GET(edge_device, config = config(ssl_verifypeer = TRUE))
+    
+    # Authenticate using OAuth2 or similar protocol
+    # This is a placeholder. Actual implementation will depend on the service's OAuth2 details
+    token <- oauth2.0_token(oauth_endpoints("service_name"), my_app)
+    response <- GET(edge_device, config(token = token))
+    
+    # Collect specific network traffic data
+    # Assuming the response content is the data we need
+    data <- content(response)
+    
+    # Validate data integrity using checksums
+    # Assuming the server sends a checksum header
+    server_checksum <- headers(response)$checksum
+    if (digest(data) != server_checksum) {
+      stop("Checksum mismatch")
+    }
+    
+    # Append collected data to OSN_dataset
+    OSN_dataset[[edge_device]] <- data
+    
+  }, error = function(e) {
+    # Log error to ErrorLog
+    ErrorLog[[edge_device]] <- e$message
+    
+    # Retry up to 3 times or skip edge_device
+    for (i in 1:3) {
+      try({
+        # Retry logic here (similar to above)
+        # If successful, break out of the loop
+        break
+      }, silent = TRUE)
+    }
+  })
+}
+
+# For each edge_device in parallel
+# This is a placeholder. Actual edge devices will be a list of URLs or IP addresses
+edge_devices <- c("http://device1.com", "http://device2.com", ...)
+
+# Using parallel processing for simultaneous data collection
+# This requires the 'parallel' package
+library(parallel)
+cl <- makeCluster(detectCores() - 1) # leave one core free
+parLapply(cl, edge_devices, collect_data_from_device)
+stopCluster(cl)
+
+# Store OSN_dataset in a secure, encrypted database
+# This is a placeholder. Actual implementation will depend on the database details
+dbWriteTable(conn, "OSN_dataset", OSN_dataset)
+
+# Return
+list(OSN_dataset = OSN_dataset, ErrorLog = ErrorLog)
+
+
+
+# Required Libraries
+install.packages(c("httr", "openssl", "digest", "dplyr"))
+library(httr)
+library(openssl)
+library(digest)
+library(dplyr)
+
+# Constants
+CPU_THRESHOLD <- 2 # Example threshold
+MEM_THRESHOLD <- 4 # Example threshold in GB
+
+# Function to check resources of an edge device
+CheckResources <- function(edge_device) {
+  # Placeholder function. Actual implementation will depend on how you can access resource info from edge devices.
+  # For this example, we'll return random values.
+  list(cpu = sample(1:4, 1), mem = sample(2:8, 1), storage = sample(10:100, 1))
+}
+
+# Function to compute a lightweight hash
+LightweightHash <- function(data) {
+  digest(data, algo = "md5")
+}
+
+# Function to add Laplace noise for differential privacy
+LaplaceNoise <- function(epsilon) {
+  # Placeholder function. Actual implementation will depend on the desired Laplace distribution parameters.
+  rnorm(1, mean = 0, sd = 1/epsilon)
+}
+
+# Main FederatedPreprocess function
+FederatedPreprocess <- function() {
+  # Placeholder for edge devices. Actual edge devices will be a list of URLs or IP addresses or some identifiers.
+  edge_devices <- c("device1", "device2", ...)
+
+  for (edge_device in edge_devices) {
+    resources <- CheckResources(edge_device)
+    
+    if (resources$cpu > CPU_THRESHOLD && resources$mem > MEM_THRESHOLD) {
+      tryCatch({
+        # Connect securely to edge_device
+        # Placeholder. Actual connection details will depend on the edge device's interface.
+        
+        # Compute initial data hash
+        data_hash <- LightweightHash(edge_device$data)
+        
+        # Normalize data
+        mu <- mean(edge_device$data)
+        sigma <- sd(edge_device$data)
+        edge_device$data <- (edge_device$data - mu) / sigma
+        
+        # Detect and remove outliers
+        k <- 1.5 # Example threshold multiplier
+        outliers <- which(abs(edge_device$data - mu) > k * sigma)
+        edge_device$data <- edge_device$data[-outliers]
+        
+        # Add Laplace noise for differential privacy
+        epsilon <- 0.1 # Example epsilon value
+        edge_device$data <- edge_device$data + LaplaceNoise(epsilon)
+        
+        # Compute new data hash
+        new_data_hash <- LightweightHash(edge_device$data)
+        
+        if (data_hash != new_data_hash) {
+          cat("Data integrity compromised for", edge_device, "\n")
+        }
+        
+      }, error = function(e) {
+        # Classify error and handle accordingly
+        # Placeholder. Actual error handling will depend on the nature of errors you expect.
+        cat("Error encountered for", edge_device, ":", e$message, "\n")
+        
+        # Retry or skip edge_device
+        # Placeholder. Actual retry logic will depend on the nature of errors and your desired retry strategy.
+      })
+    } else {
+      cat("Insufficient resources for", edge_device, "\n")
+    }
+  }
+  
+  # Send feedback metrics to central server
+  # Placeholder. Actual feedback sending will depend on how you interface with the central server.
+}
+
+# Run the FederatedPreprocess function
+FederatedPreprocess()
+
+
+# Required Libraries
+install.packages(c("caret", "httr", "dplyr"))
+library(caret)
+library(httr)
+library(dplyr)
+
+# Constants
+THRESHOLD <- 2 # Example threshold
+
+# Function to check resources of an edge device
+CheckResources <- function(edge_device) {
+  # Placeholder function. Actual implementation will depend on how you can access resource info from edge devices.
+  # For this example, we'll return random values.
+  sample(1:4, 1)
+}
+
+# Function to perform Recursive Feature Elimination (RFE)
+RFE <- function(data, model) {
+  # Placeholder function. Actual implementation will depend on the specifics of your data and model.
+  # For this example, we'll return a random subset of the data's columns.
+  sample(colnames(data), size = floor(ncol(data) / 2))
+}
+
+# Function to aggregate features from all devices
+AggregateFeaturesFromAllDevices <- function() {
+  # Placeholder function. Actual implementation will depend on how you collect and aggregate features from devices.
+  # For this example, we'll return a random set of features.
+  c("feature1", "feature2", "feature3")
+}
+
+# Main FederatedFeatureSelection function
+FederatedFeatureSelection <- function(Model) {
+  # Placeholder for edge devices. Actual edge devices will be a list of URLs or IP addresses or some identifiers.
+  edge_devices <- c("device1", "device2", ...)
+
+  Global_selected_features <- c()
+
+  for (edge_device in edge_devices) {
+    tryCatch({
+      resources <- CheckResources(edge_device)
+      
+      if (resources > THRESHOLD) {
+        selected_features <- RFE(edge_device$data, Model)
+        
+        # Send selected_features to central server
+        # Placeholder. Actual sending will depend on how you interface with the central server.
+        
+        Global_selected_features <- union(Global_selected_features, selected_features)
+      }
+      
+    }, error = function(e) {
+      # Log error and skip edge_device
+      cat("Error encountered for", edge_device, ":", e$message, "\n")
+    })
+  }
+  
+  Global_selected_features <- AggregateFeaturesFromAllDevices()
+  
+  # Use version control to ensure consistency in the feature selection method
+  # Placeholder. Actual version control will depend on your desired version control strategy.
+  
+  return(Global_selected_features)
+}
+
+# Run the FederatedFeatureSelection function
+Model <- "FeMuDeep" # Placeholder for the actual model
+selected_features <- FederatedFeatureSelection(Model)
+print(selected_features)
+
+
+# Required Libraries
+install.packages(c("caret", "dplyr"))
+library(caret)
+library(dplyr)
+
+# Constants
+THRESHOLD <- 2 # Example threshold
+
+# Placeholder for the global model
+M_g <- NULL
+
+# Function to check resources of an edge device
+CheckResources <- function(edge_device) {
+  # Placeholder function. Actual implementation will depend on how you can access resource info from edge devices.
+  # For this example, we'll return random values.
+  sample(1:4, 1)
+}
+
+# Function to train the model
+train <- function(model, data) {
+  # Placeholder function. Actual implementation will depend on the specifics of your data and model.
+  # For this example, we'll return a random model.
+  list(weights = runif(ncol(data)))
+}
+
+# Function to aggregate models from all devices
+WeightedAggregate <- function(models) {
+  # Placeholder function. Actual implementation will depend on how you collect and aggregate models from devices.
+  # For this example, we'll return a random model.
+  list(weights = runif(length(models)))
+}
+
+# Main EnhancedFederatedTrainingAndAggregation function
+EnhancedFederatedTrainingAndAggregation <- function() {
+  # Placeholder for edge devices. Actual edge devices will be a list of URLs or IP addresses or some identifiers.
+  edge_devices <- c("device1", "device2", ...)
+
+  models <- list()
+
+  for (edge_device in edge_devices) {
+    tryCatch({
+      # Fetch latest version of M_g
+      # Placeholder. Actual fetching will depend on how you interface with the central server.
+      
+      resources <- CheckResources(edge_device)
+      
+      if (resources > THRESHOLD) {
+        # StratifiedSample or WeightData based on D_d
+        # Placeholder. Actual sampling or weighting will depend on your desired strategy.
+        
+        selected_features <- c("feature1", "feature2", ...) # Placeholder for selected features
+        M_d_prime <- train(M_g, edge_device$data[selected_features])
+        
+        # Check communication_frequency condition
+        # Placeholder. Actual condition will depend on your desired communication strategy.
+        if (TRUE) {
+          # Securely send M_d_prime to central server
+          # Placeholder. Actual sending will depend on how you interface with the central server.
+          models <- append(models, list(M_d_prime))
+        }
+      }
+      
+    }, error = function(e) {
+      # Handle error (e.g., log, retry, or skip edge_device)
+      cat("Error encountered for", edge_device, ":", e$message, "\n")
+    })
+  }
+  
+  M_g_prime <- WeightedAggregate(models)
+  
+  return(M_g_prime)
+}
+
+# Run the EnhancedFederatedTrainingAndAggregation function
+new_model <- EnhancedFederatedTrainingAndAggregation()
+print(new_model)
+
+
+# Required Libraries
+install.packages(c("igraph", "dplyr"))
+library(igraph)
+library(dplyr)
+
+# Placeholder for the global model
+global_model <- NULL
+
+# Convert network traffic to graph
+ConvertToGraph <- function(network_traffic) {
+  # Placeholder function. Actual implementation will depend on the specifics of your data.
+  # For this example, we'll return a random graph.
+  graph <- make_ring(10)
+  return(graph)
+}
+
+# Check if it's time to update the global model
+time_to_update <- function(model) {
+  # Placeholder function. Actual implementation will depend on your desired update strategy.
+  # For this example, we'll return a random boolean.
+  sample(c(TRUE, FALSE), 1)
+}
+
+# Distributed retraining of the global model
+distributed_retrain <- function(model, recent_traffic) {
+  # Placeholder function. Actual implementation will depend on the specifics of your data and model.
+  # For this example, we'll return a random model.
+  list(weights = runif(10))
+}
+
+# Distributed GNN training and embedding
+Distributed_GNN_Train_and_Embed <- function(graph) {
+  # Placeholder function. Actual implementation will depend on the specifics of your data and model.
+  # For this example, we'll return random embeddings.
+  matrix(runif(100), ncol=10)
+}
+
+# Distributed VGAE training
+Distributed_VGAE_Train <- function(VGAE_Input) {
+  # Placeholder function. Actual implementation will depend on the specifics of your data and model.
+  # For this example, we'll return nothing.
+  NULL
+}
+
+# VGAE anomaly detection
+VGAE_DetectAnomalies <- function(VGAE_Input, dynamic_threshold) {
+  # Placeholder function. Actual implementation will depend on the specifics of your data and model.
+  # For this example, we'll return random anomalies.
+  sample(1:nrow(VGAE_Input), 5)
+}
+
+# Log or report anomalies
+log_or_report <- function(anomaly) {
+  # Placeholder function. Actual implementation will depend on how you want to log or report anomalies.
+  cat("Anomaly detected:", anomaly, "\n")
+}
+
+# Validate anomalies
+validate <- function(anomaly) {
+  # Placeholder function. Actual implementation will depend on how you validate anomalies.
+  # For this example, we'll return a random boolean.
+  sample(c(TRUE, FALSE), 1)
+}
+
+# Refine the global model based on feedback
+refine_model <- function(model, feedback) {
+  # Placeholder function. Actual implementation will depend on the specifics of your feedback and model.
+  # For this example, we'll return a random model.
+  list(weights = runif(10))
+}
+
+# Main DetectAnomalies function
+DetectAnomalies <- function() {
+  network_traffic <- NULL # Placeholder for network traffic data
+  graph <- ConvertToGraph(network_traffic)
+  
+  if (time_to_update(global_model)) {
+    global_model <- distributed_retrain(global_model, network_traffic)
+  }
+  
+  embeddings <- Distributed_GNN_Train_and_Embed(graph)
+  VGAE_Input <- embeddings
+  Distributed_VGAE_Train(VGAE_Input)
+  
+  dynamic_threshold <- 0.5 # Placeholder for dynamic threshold
+  anomalies <- VGAE_DetectAnomalies(VGAE_Input, dynamic_threshold)
+  
+  for (anomaly in anomalies) {
+    log_or_report(anomaly)
+    feedback <- validate(anomaly)
+    if (feedback) {
+      global_model <- refine_model(global_model, feedback)
+    }
+  }
+}
+
+# Run the DetectAnomalies function
+DetectAnomalies()
