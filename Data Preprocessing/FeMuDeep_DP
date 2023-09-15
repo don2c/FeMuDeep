@@ -1,1 +1,86 @@
 
+# Required Libraries
+install.packages(c("httr", "openssl", "digest", "dplyr"))
+library(httr)
+library(openssl)
+library(digest)
+library(dplyr)
+
+# Constants
+CPU_THRESHOLD <- 2 # Example threshold
+MEM_THRESHOLD <- 4 # Example threshold in GB
+
+# Function to check resources of an edge device
+CheckResources <- function(edge_device) {
+  # Placeholder function. Actual implementation will depend on how you can access resource info from edge devices.
+  # For this example, we'll return random values.
+  list(cpu = sample(1:4, 1), mem = sample(2:8, 1), storage = sample(10:100, 1))
+}
+
+# Function to compute a lightweight hash
+LightweightHash <- function(data) {
+  digest(data, algo = "md5")
+}
+
+# Function to add Laplace noise for differential privacy
+LaplaceNoise <- function(epsilon) {
+  # Placeholder function. Actual implementation will depend on the desired Laplace distribution parameters.
+  rnorm(1, mean = 0, sd = 1/epsilon)
+}
+
+# Main FederatedPreprocess function
+FederatedPreprocess <- function() {
+  # Placeholder for edge devices. Actual edge devices will be a list of URLs or IP addresses or some identifiers.
+  edge_devices <- c("device1", "device2", ...)
+
+  for (edge_device in edge_devices) {
+    resources <- CheckResources(edge_device)
+    
+    if (resources$cpu > CPU_THRESHOLD && resources$mem > MEM_THRESHOLD) {
+      tryCatch({
+        # Connect securely to edge_device
+        # Placeholder. Actual connection details will depend on the edge device's interface.
+        
+        # Compute initial data hash
+        data_hash <- LightweightHash(edge_device$data)
+        
+        # Normalize data
+        mu <- mean(edge_device$data)
+        sigma <- sd(edge_device$data)
+        edge_device$data <- (edge_device$data - mu) / sigma
+        
+        # Detect and remove outliers
+        k <- 1.5 # Example threshold multiplier
+        outliers <- which(abs(edge_device$data - mu) > k * sigma)
+        edge_device$data <- edge_device$data[-outliers]
+        
+        # Add Laplace noise for differential privacy
+        epsilon <- 0.1 # Example epsilon value
+        edge_device$data <- edge_device$data + LaplaceNoise(epsilon)
+        
+        # Compute new data hash
+        new_data_hash <- LightweightHash(edge_device$data)
+        
+        if (data_hash != new_data_hash) {
+          cat("Data integrity compromised for", edge_device, "\n")
+        }
+        
+      }, error = function(e) {
+        # Classify error and handle accordingly
+        # Placeholder. Actual error handling will depend on the nature of errors you expect.
+        cat("Error encountered for", edge_device, ":", e$message, "\n")
+        
+        # Retry or skip edge_device
+        # Placeholder. Actual retry logic will depend on the nature of errors and your desired retry strategy.
+      })
+    } else {
+      cat("Insufficient resources for", edge_device, "\n")
+    }
+  }
+  
+  # Send feedback metrics to central server
+  # Placeholder. Actual feedback sending will depend on how you interface with the central server.
+}
+
+# Run the FederatedPreprocess function
+FederatedPreprocess()
